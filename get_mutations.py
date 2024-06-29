@@ -40,8 +40,18 @@ def aa_annotation(ranges,ref_seq):
     for key, value in ranges.items():
         start = value[0]-1
         end = value[1]
-        aa_seq = ref_seq[start:end]
+        aa_seq = Seq(ref_seq[start:end]).translate()
         print(f"{key}: {aa_seq}")
+
+def mutate_sequence(table, ref_seq):
+    lista_cadena = list(ref_seq)
+    for index, row in table.iterrows():
+        pos = row['POS']
+        alt = row['ALT']
+        # Sustituir la letra en la posición indicada (pos - 1 porque las posiciones en df son 1-indexed)
+        lista_cadena[pos - 1] = alt
+    cadena_modificada = ''.join(lista_cadena)
+    print(cadena_modificada)
 
 def main():
     parser = argparse.ArgumentParser(description='Get mutations from SARS-CoV-2 sequences')
@@ -50,6 +60,9 @@ def main():
     args = parser.parse_args()
     ref_seq = "".join(getsars_ref().split('\n')[1:])
     check_mut = read_tsv(args.input)
+    print(check_mut)
+    annot = get_annotation()
+    mutate_sequence(check_mut, ref_seq)
 
 if __name__ == '__main__':
     main()
