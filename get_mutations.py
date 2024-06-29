@@ -2,9 +2,9 @@
 import argparse
 import pandas as pd
 import requests
-from Bio.Seq import Seq, MutableSeq
+from Bio.Seq import Seq
 
-def getsars_ref():
+def get_sars_ref():
     url = "https://www.ebi.ac.uk/ena/browser/api/fasta/MN908947.3"
     response = requests.get(url)
     
@@ -12,7 +12,7 @@ def getsars_ref():
         sars_ref_content = response.text
         return "".join(sars_ref_content.split('\n')[1:])
     else:
-        print(f"Error en el servidor EBI: {response.status_code} {response.reason}")
+        print(f"Error on the EBI server: {response.status_code} {response.reason}")
         return None
 
 def get_annotation():
@@ -35,37 +35,25 @@ def read_tsv(file_path):
     df.columns = df.columns.str.upper()  
     return df
 
-def mutate_sequence_for_sample(sample_mutations, ref_seq):
-    mutated_seq = list(ref_seq)
-    for index, row in sample_mutations.iterrows():
-        pos = row['POS']
-        alt = row['ALT']
-        mutated_seq[pos - 1] = alt  
-    return ''.join(mutated_seq)
-
 def determine_amino_acids(mutations, ref_seq, annotation_ranges):
     effects = []
-    for index, row in mutations.iterrows():
+    for _, row in mutations.iterrows():
         pos_nucleotide = row['POS']
         alt_nucleotide = row['ALT']
         for gene, (start, end) in annotation_ranges.items():
             if pos_nucleotide >= start and pos_nucleotide <= end:
-                gene_seq = Seq(ref_seq[start - 1:end])  # Secuencia del gen
-                aa_index = (pos_nucleotide - start) // 3  # Índice del aminoácido en la secuencia traducida
-                original_codon_start = (pos_nucleotide - start) // 3 * 3
+                gene_seq = Seq(ref_seq[start - 1:end])
+                aa_index = (pos_nucleotide - start) // 3
+                original_codon_start = aa_index * 3
                 original_codon = gene_seq[original_codon_start:original_codon_start+3]
                 
-
                 aa_ref = original_codon.translate()
-
-
                 mutated_codon = list(original_codon)
                 mutated_codon[(pos_nucleotide - start) % 3] = alt_nucleotide
                 mutated_codon = Seq("".join(mutated_codon))
                 
                 aa_mut = mutated_codon.translate()
-
-                aa_pos = aa_index + 1  
+                aa_pos = aa_index + 1
 
                 effects.append((pos_nucleotide, gene, aa_ref, aa_mut, aa_pos))
     return effects
@@ -75,7 +63,7 @@ def main():
     parser.add_argument('-i', '--input', help='Path to input TSV file', required=True)
     args = parser.parse_args()
 
-    ref_seq = getsars_ref()
+    ref_seq = get_sars_ref()
     if ref_seq is None:
         return
 
@@ -86,7 +74,6 @@ def main():
 
     for sample in samples:
         sample_mutations = mutation_data[mutation_data['SAMPLE'] == sample]
-        mutated_seq = mutate_sequence_for_sample(sample_mutations, ref_seq)
 
         print(f"Sample {sample} mutations:")
         effects = determine_amino_acids(sample_mutations, ref_seq, annotation_ranges)
