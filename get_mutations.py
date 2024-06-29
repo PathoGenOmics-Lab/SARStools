@@ -38,8 +38,10 @@ def read_tsv(file_path):
 def determine_amino_acids(mutations, ref_seq, annotation_ranges):
     effects = []
     for _, row in mutations.iterrows():
+        sample = row['SAMPLE']
         pos_nucleotide = row['POS']
         alt_nucleotide = row['ALT']
+        ref_nucleotide = ref_seq[pos_nucleotide - 1]
         for gene, (start, end) in annotation_ranges.items():
             if pos_nucleotide >= start and pos_nucleotide <= end:
                 gene_seq = Seq(ref_seq[start - 1:end])
@@ -55,12 +57,13 @@ def determine_amino_acids(mutations, ref_seq, annotation_ranges):
                 aa_mut = mutated_codon.translate()
                 aa_pos = aa_index + 1
 
-                effects.append((pos_nucleotide, gene, aa_ref, aa_mut, aa_pos))
+                effects.append((sample, pos_nucleotide, ref_nucleotide, alt_nucleotide, gene, aa_ref, aa_mut, aa_pos))
     return effects
 
 def main():
     parser = argparse.ArgumentParser(description='Get mutations from SARS-CoV-2 sequences')
     parser.add_argument('-i', '--input', help='Path to input TSV file', required=True)
+    parser.add_argument('-o', '--output', help='Path to output TSV file', required=True)
     args = parser.parse_args()
 
     ref_seq = get_sars_ref()
@@ -70,15 +73,17 @@ def main():
     mutation_data = read_tsv(args.input)
     annotation_ranges = get_annotation()
 
+    all_effects = []
+
     samples = mutation_data['SAMPLE'].unique()
 
     for sample in samples:
         sample_mutations = mutation_data[mutation_data['SAMPLE'] == sample]
-
-        print(f"Sample {sample} mutations:")
         effects = determine_amino_acids(sample_mutations, ref_seq, annotation_ranges)
-        for pos, gene, aa_ref, aa_mut, aa_pos in effects:
-            print(f"Position {pos} in gene {gene}: Reference AA: {aa_ref}, Mutated AA: {aa_mut}, Amino Acid Position: {aa_pos}")
+        all_effects.extend(effects)
+
+    output_df = pd.DataFrame(all_effects, columns=['Sample', 'Nucleotide Position', 'Reference Nucleotide', 'Alternate Nucleotide', 'Gene', 'Reference AA', 'Mutated AA', 'Amino Acid Position'])
+    output_df.to_csv(args.output, sep='\t', index=False)
 
 if __name__ == '__main__':
     main()
