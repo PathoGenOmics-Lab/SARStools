@@ -3,6 +3,7 @@ import argparse
 import os
 import pandas as pd
 import requests
+from Bio.Seq import Seq
 
 def getsars_ref():
     url = "https://www.ebi.ac.uk/ena/browser/api/fasta/MN908947.3"
@@ -35,12 +36,20 @@ def read_tsv(file_path):
     df.columns = df.columns.str.upper()
     return df
 
+def aa_annotation(ranges,ref_seq):
+    for key, value in ranges.items():
+        start = value[0]-1
+        end = value[1]
+        aa_seq = ref_seq[start:end]
+        print(f"{key}: {aa_seq}")
+
 def main():
     parser = argparse.ArgumentParser(description='Get mutations from SARS-CoV-2 sequences')
-    #parser.add_argument('-i', '--input', help='', required=True)
+    parser.add_argument('-i', '--input', help='', required=True)
     #parser.add_argument('-o', '--output', help='', required=True)
     args = parser.parse_args()
     ref_seq = "".join(getsars_ref().split('\n')[1:])
-    print(get_annotation())
+    check_mut = read_tsv(args.input)
+
 if __name__ == '__main__':
     main()
