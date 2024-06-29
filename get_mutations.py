@@ -15,6 +15,21 @@ def getsars_ref():
         print(f"Error in the EBI server: {response.status_code} {response.reason}")
         return None
 
+def get_annotation():
+    ranges = {
+    'NSP1': (266, 805), 'NSP2': (806, 2719),'NSP3': (2720, 8554),
+    'NSP4': (8555, 10054),'NSP5': (10055, 10972),'NSP6': (10973, 11842),
+    'NSP7': (11843, 12091),'NSP8': (12092, 12685),'NSP9': (12686, 13024),
+    'NSP10': (13025, 13441),'NSP11': (13442, 13468),'NSP12': (13468, 16236),
+    'NSP13': (16237, 18039),'NSP14': (18040, 19620),'NSP15': (19621, 20658),
+    'NSP16': (20659, 21552),'ORF1ab': (266, 21555),'S': (21563, 25384),
+    'ORF3a': (25393, 26220),'E': (26245, 26472),'M': (26523, 27191),
+    'ORF6': (27202, 27387),'ORF7a': (27394, 27759),'ORF7b': (27756, 27887),
+    'ORF8': (27894, 28259),'N': (28274, 29533),'ORF10': (29558, 29674),
+    'ORF1a': (266, 13468),'ORF1b': (13468, 21555)
+    }
+    return ranges
+
 def main():
     parser = argparse.ArgumentParser(description='Get mutations from SARS-CoV-2 sequences')
     #parser.add_argument('-i', '--input', help='', required=True)
