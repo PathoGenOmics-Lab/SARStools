@@ -30,12 +30,17 @@ def get_annotation():
     }
     return ranges
 
+def read_tsv(file_path):
+    df = pd.read_csv(file_path, sep='\t')
+    df.columns = df.columns.str.upper()
+    return df
+
 def main():
     parser = argparse.ArgumentParser(description='Get mutations from SARS-CoV-2 sequences')
     #parser.add_argument('-i', '--input', help='', required=True)
     #parser.add_argument('-o', '--output', help='', required=True)
     args = parser.parse_args()
-
     ref_seq = "".join(getsars_ref().split('\n')[1:])
+    print(get_annotation())
 if __name__ == '__main__':
     main()
