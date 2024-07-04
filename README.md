@@ -15,6 +15,8 @@ You can install the required Python packages using pip:
 
 ```bash
 pip install pandas requests biopython
+#OR
+pip3 install pandas requests biopython
 ```
 
 ## Input Example
