@@ -19,26 +19,14 @@ pip install pandas requests biopython
 
 ## Input Example
 
-``` tsv
-Sample  Pos     Alt
-seq1    241     G
-seq1    3037    A
-seq1    4321    A
-seq1    9424    A
-seq1    10198   A
-seq1    10447   T
-seq2    12880   A
-seq2    15714   A
-seq2    20055   A
-seq2    25000   A
-seq2    25584   A
-seq2    26858   A
-seq2    27259   A
+Go to a tsv file for the example: 
+```bash
+wget https://raw.githubusercontent.com/PathoGenOmics-Lab/SARStools/main/in.file
 ```
 
 ## Running the Script
 
 You can run the script from the command line as follows:
-``` bash
+```bash
 python3 get_mutations.py -i input_file.tsv -o output_file.tsv
 ```
